@@ -56,33 +56,18 @@ function GenerateBrandDNAContent() {
         {status === 'loading' && (
           <>
             <div className="flex justify-center mb-6">
-              <svg className="animate-spin h-16 w-16 text-accent-gold" viewBox="0 0 24 24">
-                <circle 
-                  className="opacity-25" 
-                  cx="12" 
-                  cy="12" 
-                  r="10" 
-                  stroke="currentColor" 
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path 
-                  className="opacity-75" 
-                  fill="currentColor" 
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
+              <div className="spinner" style={{ width: '4rem', height: '4rem', borderColor: 'rgba(255,215,0,0.2)', borderTopColor: 'var(--accent-gold)' }}></div>
             </div>
-            <h1 className="text-3xl font-bold mb-4">Generating Brand DNA</h1>
-            <p className="text-gray-400 mb-4">
+            <h1 className="mb-4">Generating Brand DNA</h1>
+            <p className="text-secondary mb-6">
               Our AI is analyzing the website data to create a comprehensive brand profile...
             </p>
-            <div className="space-y-2 text-left max-w-md mx-auto text-sm text-gray-500">
-              <p>✓ Analyzing content and messaging</p>
-              <p>✓ Evaluating visual identity</p>
-              <p>✓ Identifying target audience</p>
-              <p>✓ Determining brand positioning</p>
-              <p className="animate-pulse">🔄 Generating insights...</p>
+            <div className="text-left max-w-md mx-auto text-sm text-tertiary">
+              <p className="mb-2">✓ Analyzing content and messaging</p>
+              <p className="mb-2">✓ Evaluating visual identity</p>
+              <p className="mb-2">✓ Identifying target audience</p>
+              <p className="mb-2">✓ Determining brand positioning</p>
+              <p style={{ animation: 'pulse 2s infinite' }}>🔄 Generating insights...</p>
             </div>
           </>
         )}
@@ -90,19 +75,19 @@ function GenerateBrandDNAContent() {
         {status === 'success' && (
           <>
             <div className="text-6xl mb-4">✅</div>
-            <h1 className="text-3xl font-bold mb-4">Brand DNA Generated!</h1>
-            <p className="text-gray-400">Redirecting to your brand profile...</p>
+            <h1 className="mb-4">Brand DNA Generated!</h1>
+            <p className="text-secondary">Redirecting to your brand profile...</p>
           </>
         )}
 
         {status === 'error' && (
           <>
             <div className="text-6xl mb-4">❌</div>
-            <h1 className="text-3xl font-bold mb-4">Generation Failed</h1>
-            <p className="text-red-400 mb-6">{error}</p>
+            <h1 className="mb-4">Generation Failed</h1>
+            <p className="text-error mb-6">{error}</p>
             <button 
               onClick={() => router.back()}
-              className="btn-primary"
+              className="btn btn-primary"
             >
               Go Back
             </button>
@@ -118,25 +103,10 @@ export default function GenerateBrandDNAPage() {
     <Suspense fallback={
       <div className="max-w-2xl mx-auto text-center">
         <div className="card">
-          <div className="flex justify-center mb-6">
-            <svg className="animate-spin h-16 w-16 text-accent-gold" viewBox="0 0 24 24">
-              <circle 
-                className="opacity-25" 
-                cx="12" 
-                cy="12" 
-                r="10" 
-                stroke="currentColor" 
-                strokeWidth="4"
-                fill="none"
-              />
-              <path 
-                className="opacity-75" 
-                fill="currentColor" 
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
+          <div className="spinner-container">
+            <div className="spinner spinner-lg"></div>
           </div>
-          <h1 className="text-3xl font-bold mb-4">Loading...</h1>
+          <h1>Loading...</h1>
         </div>
       </div>
     }>

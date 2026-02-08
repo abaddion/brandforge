@@ -5,11 +5,11 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Campaign, CampaignPost } from '@/types';
 
-const PLATFORM_INFO: Record<string, { icon: string; color: string; name: string }> = {
-  linkedin: { icon: '💼', color: '#0077B5', name: 'LinkedIn' },
-  twitter: { icon: '🐦', color: '#1DA1F2', name: 'Twitter/X' },
-  instagram: { icon: '📸', color: '#E4405F', name: 'Instagram' },
-  facebook: { icon: '👥', color: '#1877F2', name: 'Facebook' },
+const PLATFORM_INFO: Record<string, { icon: string; name: string }> = {
+  linkedin: { icon: '💼', name: 'LinkedIn' },
+  twitter: { icon: '🐦', name: 'Twitter/X' },
+  instagram: { icon: '📸', name: 'Instagram' },
+  facebook: { icon: '👥', name: 'Facebook' },
 };
 
 export default function CampaignsPage() {
@@ -58,9 +58,9 @@ export default function CampaignsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto text-center py-12">
-        <div className="animate-spin h-12 w-12 border-4 border-accent-gold border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-gray-400">Loading campaigns...</p>
+      <div className="max-w-6xl mx-auto text-center" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
+        <div className="spinner mx-auto mb-4"></div>
+        <p className="text-secondary">Loading campaigns...</p>
       </div>
     );
   }
@@ -69,9 +69,9 @@ export default function CampaignsPage() {
     return (
       <div className="max-w-4xl mx-auto text-center">
         <div className="text-6xl mb-4">❌</div>
-        <h1 className="text-3xl font-bold mb-4">Error Loading Campaigns</h1>
-        <p className="text-red-400 mb-6">{error}</p>
-        <Link href={`/brand-dna/${brandProfileId}`} className="btn-primary inline-block">
+        <h1 className="mb-4">Error Loading Campaigns</h1>
+        <p className="text-error mb-6">{error}</p>
+        <Link href={`/brand-dna/${brandProfileId}`} className="btn btn-primary inline-block">
           Back to Brand DNA
         </Link>
       </div>
@@ -82,11 +82,11 @@ export default function CampaignsPage() {
     return (
       <div className="max-w-4xl mx-auto text-center">
         <div className="text-6xl mb-4">📭</div>
-        <h1 className="text-3xl font-bold mb-4">No Campaigns Yet</h1>
-        <p className="text-gray-400 mb-6">Generate your first campaign to get started</p>
+        <h1 className="mb-4">No Campaigns Yet</h1>
+        <p className="text-secondary mb-6">Generate your first campaign to get started</p>
         <Link 
           href={`/campaigns/generate?brandProfileId=${brandProfileId}`}
-          className="btn-primary inline-block"
+          className="btn btn-primary inline-block"
         >
           Generate Campaigns
         </Link>
@@ -98,17 +98,17 @@ export default function CampaignsPage() {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <Link href={`/brand-dna/${brandProfileId}`} className="text-accent-gold hover:underline mb-4 inline-block">
+        <Link href={`/brand-dna/${brandProfileId}`} className="back-link">
           ← Back to Brand DNA
         </Link>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Social Media Campaigns</h1>
-            <p className="text-gray-400">AI-generated content ready to publish</p>
+            <h1 className="mb-2">Social Media Campaigns</h1>
+            <p className="text-secondary">AI-generated content ready to publish</p>
           </div>
           <Link 
             href={`/campaigns/generate?brandProfileId=${brandProfileId}`}
-            className="btn-primary"
+            className="btn btn-primary"
           >
             + Generate More
           </Link>
@@ -117,90 +117,79 @@ export default function CampaignsPage() {
 
       {/* Campaigns by Platform */}
       {campaigns.map((campaign) => {
-        const platformInfo = PLATFORM_INFO[campaign.platform] || {
-          icon: '📱',
-          color: '#666',
-          name: campaign.platform.charAt(0).toUpperCase() + campaign.platform.slice(1)
-        };
+        const platformInfo = PLATFORM_INFO[campaign.platform];
         
         return (
           <div key={campaign._id?.toString()} className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-4xl">{platformInfo.icon}</span>
-              <h2 className="text-3xl font-bold">{platformInfo.name}</h2>
+              <h2>{platformInfo.name}</h2>
             </div>
 
             {campaign.campaigns.map((campaignType, typeIndex) => (
               <div key={typeIndex} className="mb-6">
-                <h3 className="text-xl font-semibold mb-4 text-accent-gold capitalize">
-                  {campaignType.type.replace(/_/g, ' ')}
+                <h3 className="text-xl font-semibold mb-4 text-gold" style={{ textTransform: 'capitalize' }}>
+                  {campaignType.type.replace('_', ' ')}
                 </h3>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   {campaignType.posts.map((post, postIndex) => {
                     const postId = `${campaign._id}-${typeIndex}-${postIndex}`;
                     
                     return (
-                      <div key={postIndex} className="card hover:border-primary transition-colors">
+                      <div key={postIndex} className="card hover-border">
                         {/* Post Text */}
                         <div className="mb-4">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-semibold text-gray-400">
+                            <span className="text-sm font-semibold text-secondary">
                               Post {postIndex + 1}
                             </span>
                             <button
                               onClick={() => copyToClipboard(post.text, postId)}
-                              className="text-xs text-accent-gold hover:underline"
+                              className="text-xs text-gold"
+                              style={{ cursor: 'pointer' }}
                             >
                               {copiedId === postId ? '✓ Copied!' : 'Copy'}
                             </button>
                           </div>
-                          <p className="text-gray-300 whitespace-pre-wrap mb-3">
+                          <p className="text-secondary whitespace-pre-wrap mb-3">
                             {post.text}
                           </p>
                           
                           {/* Hashtags */}
-                          {post.hashtags && post.hashtags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {post.hashtags.map((tag, i) => (
-                                <span key={i} className="text-sm text-primary">
-                                  #{tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {post.hashtags.map((tag, i) => (
+                              <span key={i} className="text-sm text-primary">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
                         </div>
 
                         {/* Metadata */}
-                        <div className="border-t border-dark-border pt-4 space-y-2 text-sm">
-                          {post.imagePrompt && (
-                            <div>
-                              <span className="text-gray-500">📸 Image:</span>
-                              <p className="text-gray-400 mt-1">{post.imagePrompt}</p>
-                            </div>
-                          )}
-                          {post.callToAction && (
-                            <div>
-                              <span className="text-gray-500">👆 CTA:</span>
-                              <p className="text-gray-400 mt-1">{post.callToAction}</p>
-                            </div>
-                          )}
-                          {post.bestTimeToPost && (
-                            <div>
-                              <span className="text-gray-500">⏰ Best time:</span>
-                              <p className="text-gray-400 mt-1">{post.bestTimeToPost}</p>
-                            </div>
-                          )}
+                        <div className="border-t pt-4 text-sm">
+                          <div className="mb-2">
+                            <span className="text-tertiary">📸 Image:</span>
+                            <p className="text-secondary mt-1">{post.imagePrompt}</p>
+                          </div>
+                          <div className="mb-2">
+                            <span className="text-tertiary">👆 CTA:</span>
+                            <p className="text-secondary mt-1">{post.callToAction}</p>
+                          </div>
+                          <div>
+                            <span className="text-tertiary">⏰ Best time:</span>
+                            <p className="text-secondary mt-1">{post.bestTimeToPost}</p>
+                          </div>
                         </div>
 
                         {/* Actions */}
-                        <div className="mt-4 pt-4 border-t border-dark-border">
+                        <div className="mt-4 pt-4 border-t">
                           <button 
                             onClick={() => copyToClipboard(
-                              `${post.text}\n\n${post.hashtags?.map(t => `#${t}`).join(' ') || ''}`,
+                              `${post.text}\n\n${post.hashtags.map(t => `#${t}`).join(' ')}`,
                               `${postId}-full`
                             )}
-                            className="btn-secondary w-full text-sm py-2"
+                            className="btn btn-secondary btn-full text-sm py-2"
                           >
                             {copiedId === `${postId}-full` ? '✓ Copied!' : 'Copy with Hashtags'}
                           </button>

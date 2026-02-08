@@ -17,14 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="border-b border-dark-border">
-          <div className="container mx-auto px-4 py-4">
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              BrandForge
-            </h1>
+        <nav>
+          <div className="container">
+            <h1>BrandForge</h1>
           </div>
         </nav>
-        <main className="container mx-auto px-4 py-8">
+        <main className="container">
           {children}
         </main>
       </body>

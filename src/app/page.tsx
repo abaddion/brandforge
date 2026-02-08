@@ -38,20 +38,16 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold mb-4">
-          Forge Your Brand Identity
-        </h1>
-        <p className="text-xl text-gray-400">
+        <h1>Forge Your Brand Identity</h1>
+        <p className="text-xl text-secondary">
           Analyze any website and generate comprehensive brand DNA profiles with AI-powered social campaigns
         </p>
       </div>
 
       <div className="card">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="url" className="block text-sm font-medium mb-2">
-              Website URL
-            </label>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="url">Website URL</label>
             <input
               type="url"
               id="url"
@@ -59,41 +55,25 @@ export default function Home() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com"
-              className="input-field"
               required
               disabled={loading}
             />
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500 rounded-lg p-4 text-red-400">
+            <div className="alert alert-error">
               {error}
             </div>
           )}
 
           <button 
             type="submit" 
-            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-primary btn-full btn-lg"
             disabled={loading}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle 
-                    className="opacity-25" 
-                    cx="12" 
-                    cy="12" 
-                    r="10" 
-                    stroke="currentColor" 
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path 
-                    className="opacity-75" 
-                    fill="currentColor" 
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
+                <div className="spinner spinner-sm"></div>
                 Analyzing Website...
               </span>
             ) : (
@@ -103,25 +83,25 @@ export default function Home() {
         </form>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-6 mt-12">
         <div className="card">
-          <div className="text-4xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold mb-2">Deep Analysis</h3>
-          <p className="text-gray-400">
+          <div className="text-6xl mb-4">🔍</div>
+          <h3>Deep Analysis</h3>
+          <p className="text-secondary">
             Scrape and analyze website content, design, and messaging
           </p>
         </div>
         <div className="card">
-          <div className="text-4xl mb-4">🧬</div>
-          <h3 className="text-xl font-semibold mb-2">Brand DNA</h3>
-          <p className="text-gray-400">
+          <div className="text-6xl mb-4">🧬</div>
+          <h3>Brand DNA</h3>
+          <p className="text-secondary">
             AI-powered brand identity extraction and profiling
           </p>
         </div>
         <div className="card">
-          <div className="text-4xl mb-4">🚀</div>
-          <h3 className="text-xl font-semibold mb-2">Campaigns</h3>
-          <p className="text-gray-400">
+          <div className="text-6xl mb-4">🚀</div>
+          <h3>Campaigns</h3>
+          <p className="text-secondary">
             Generate platform-specific social media campaigns
           </p>
         </div>

@@ -57,10 +57,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate campaigns for each platform and type combination
-    const allCampaigns = [];
+    // Add delays between requests to avoid hitting rate limits
+    const DELAY_BETWEEN_CAMPAIGNS = 2000; // 2 seconds between campaigns
+    const DELAY_BETWEEN_PLATFORMS = 3000; // 3 seconds between platforms
 
     for (const platform of requestedPlatforms) {
       console.log(`Generating ${platform} campaigns...`);
+      
+      const platformCampaigns = [];
       
       for (const type of requestedTypes) {
         console.log(`  - Campaign type: ${type}`);
@@ -72,10 +76,16 @@ export async function POST(request: NextRequest) {
             type
           );
 
-          allCampaigns.push({
+          platformCampaigns.push({
             type,
             posts
           });
+          
+          // Add delay between campaign types to avoid rate limits
+          if (requestedTypes.indexOf(type) < requestedTypes.length - 1) {
+            console.log(`  Waiting ${DELAY_BETWEEN_CAMPAIGNS}ms before next campaign...`);
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_CAMPAIGNS));
+          }
         } catch (error) {
           console.error(`Failed to generate ${type} campaign for ${platform}:`, error);
           // Continue with other campaigns even if one fails
@@ -83,15 +93,21 @@ export async function POST(request: NextRequest) {
       }
 
       // Save campaign for this platform
-      if (allCampaigns.length > 0) {
+      if (platformCampaigns.length > 0) {
         const campaign: Omit<Campaign, '_id'> = {
           brandProfileId: new ObjectId(brandProfileId),
           createdAt: new Date(),
           platform,
-          campaigns: allCampaigns
+          campaigns: platformCampaigns
         };
 
         await db.collection<Campaign>('campaigns').insertOne(campaign as any);
+      }
+      
+      // Add delay between platforms to avoid rate limits
+      if (requestedPlatforms.indexOf(platform) < requestedPlatforms.length - 1) {
+        console.log(`Waiting ${DELAY_BETWEEN_PLATFORMS}ms before next platform...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_PLATFORMS));
       }
     }
 
