@@ -6,12 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "create-indexes": "tsx scripts/create-indexes.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
+    "@google/generative-ai": "^0.24.1",
+    "cheerio": "^1.2.0",
+    "dotenv": "^17.2.4",
+    "mongodb": "^7.1.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
+  },
+  "optionalDependencies": {
+    "puppeteer": "^24.37.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -22,6 +31,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

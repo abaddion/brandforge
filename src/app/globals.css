@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-primary-dark: #1a237e;
+  --color-primary: #0d47a1;
+  --color-primary-light: #1565c0;
+  
+  --color-accent-gold: #ffd700;
+  --color-accent-gold-dark: #ccac00;
+  
+  --color-dark-bg: #0a0a0a;
+  --color-dark-card: #121212;
+  --color-dark-border: #1f1f1f;
+  
+  --background-image-gradient-primary: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-dark-bg text-white;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .card {
+    @apply bg-dark-card border border-dark-border rounded-lg p-6;
+  }
+  
+  .btn-primary {
+    background-image: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+    @apply text-white px-6 py-3 rounded-lg font-medium 
+           hover:opacity-90 transition-opacity;
+  }
+  
+  .btn-secondary {
+    @apply border-2 border-accent-gold text-accent-gold px-6 py-3 rounded-lg 
+           font-medium hover:bg-accent-gold hover:text-black transition-all;
+  }
+  
+  .input-field {
+    @apply bg-dark-card border border-dark-border rounded-lg px-4 py-3 
+           text-white focus:border-primary focus:outline-none w-full;
+  }
+  
+  .bg-gradient-primary {
+    background-image: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+  }
 }
