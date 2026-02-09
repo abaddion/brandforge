@@ -204,7 +204,7 @@ function GenerateCampaignsContent() {
                 <span className="platform-icon">{type.icon}</span>
                 <div className="text-left">
                   <h3 className="text-xl font-bold mb-1">{type.name}</h3>
-                  <p className="text-sm" style={{
+                  <p className="text-sm text-secondary" style={{
                     color: selectedTypes.includes(type.id) ? 'rgba(255,255,255,0.9)' : undefined
                   }}>
                     {type.description}

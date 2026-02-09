@@ -24,8 +24,8 @@
   
   /* Text */
   --text-primary: #ffffff;
-  --text-secondary: #a3a3a3;
-  --text-tertiary: #737373;
+  --text-secondary: #d1d1d1;
+  --text-tertiary: #b3b3b3;
   
   /* Status Colors */
   --success: #22c55e;
@@ -221,6 +221,26 @@ main {
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+}
+
+/* Ensure all text inside cards is light */
+.card h1,
+.card h2,
+.card h3,
+.card h4,
+.card h5,
+.card h6 {
+  color: var(--text-primary);
+}
+
+.card p,
+.card .text-secondary {
+  color: var(--text-secondary);
+}
+
+.card .text-tertiary {
+  color: var(--text-tertiary);
 }
 
 .card::before {
@@ -677,6 +697,36 @@ textarea::placeholder {
   transition: var(--transition-base);
   position: relative;
   overflow: hidden;
+  color: var(--text-primary);
+}
+
+/* Ensure all text inside platform cards is light */
+.platform-card {
+  color: var(--text-primary);
+}
+
+.platform-card h1,
+.platform-card h2,
+.platform-card h3,
+.platform-card h4,
+.platform-card h5,
+.platform-card h6 {
+  color: var(--text-primary) !important;
+}
+
+.platform-card p,
+.platform-card span,
+.platform-card div {
+  color: var(--text-secondary) !important;
+}
+
+.platform-card p.text-secondary,
+.platform-card .text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.platform-card .text-tertiary {
+  color: var(--text-tertiary) !important;
 }
 
 .platform-card::after {
@@ -704,6 +754,17 @@ textarea::placeholder {
   border-color: var(--accent-gold);
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
   box-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
+}
+
+/* When platform card has gradient background, ensure text is white */
+.platform-card[style*="background"] h3,
+.platform-card[style*="background"] p,
+.platform-card[style*="background"] {
+  color: #ffffff !important;
+}
+
+.platform-card[style*="background"] .text-secondary {
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .platform-icon {
@@ -887,6 +948,7 @@ textarea::placeholder {
   font-size: clamp(1.125rem, 2vw, 1.5rem);
   color: var(--text-secondary);
   max-width: 600px;
+  font-weight: 400;
   margin: 0 auto var(--spacing-xl);
   line-height: 1.6;
 }
@@ -1000,4 +1062,21 @@ textarea::placeholder {
   font-weight: 600;
   text-transform: capitalize;
   margin-bottom: 1rem;
+}
+
+/* Ensure selection count text is light */
+.card .text-sm.text-secondary,
+.card span.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* Ensure all body text on dark background is light */
+body {
+  color: var(--text-primary);
+}
+
+body p,
+body span,
+body div {
+  color: inherit;
 }
