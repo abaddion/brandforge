@@ -20,7 +20,9 @@ if (!MONGODB_URI) {
 }
 
 async function createOptimizedIndexes() {
-  const client = new MongoClient(MONGODB_URI);
+  // TypeScript guard: MONGODB_URI is guaranteed to be string here
+  const uri = MONGODB_URI as string;
+  const client = new MongoClient(uri);
 
   try {
     await client.connect();
