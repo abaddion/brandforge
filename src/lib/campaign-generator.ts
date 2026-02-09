@@ -176,7 +176,7 @@ AVOID these themes from generated campaigns:
 ${context.recentThemes.slice(0, 15).join(', ')}
 
 AVOID these hashtags from generated campaigns:
-${context.usedHashtags.slice(0, 20).map(h => `#${h}`).join(', ')}
+${context.usedHashtags.slice(0, 20).map((h: string) => `#${h}`).join(', ')}
 `;
   }
 
