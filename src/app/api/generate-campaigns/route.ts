@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { generateCampaign } from '@/lib/campaign-generator';
+import { CampaignContextBuilder } from '@/lib/campaign-context-builder';
 import { BrandProfile, Campaign, Platform, CampaignTypeEnum } from '@/types';
+
+function getSeason(date: Date): string {
+  const month = date.getMonth();
+  if (month >= 2 && month <= 4) return 'Spring';
+  if (month >= 5 && month <= 7) return 'Summer';
+  if (month >= 8 && month <= 10) return 'Fall';
+  return 'Winter';
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,33 +24,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate platforms
+    // Validate inputs
     const validPlatforms: Platform[] = ['linkedin', 'twitter', 'instagram', 'facebook'];
     const requestedPlatforms = platforms.filter((p: string) => 
       validPlatforms.includes(p as Platform)
     ) as Platform[];
 
-    if (requestedPlatforms.length === 0) {
-      return NextResponse.json(
-        { error: 'At least one valid platform is required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate campaign types
     const validTypes: CampaignTypeEnum[] = ['product_launch', 'thought_leadership', 'engagement', 'brand_awareness'];
     const requestedTypes = campaignTypes.filter((t: string) => 
       validTypes.includes(t as CampaignTypeEnum)
     ) as CampaignTypeEnum[];
 
-    if (requestedTypes.length === 0) {
+    if (requestedPlatforms.length === 0 || requestedTypes.length === 0) {
       return NextResponse.json(
-        { error: 'At least one valid campaign type is required' },
+        { error: 'Invalid platforms or campaign types' },
         { status: 400 }
       );
     }
 
-    console.log(`Generating campaigns for brand profile: ${brandProfileId}`);
+    console.log(`[${brandProfileId}] Generating campaigns`);
 
     // Fetch brand profile
     const db = await getDb();
@@ -50,60 +51,81 @@ export async function POST(request: NextRequest) {
     });
 
     if (!brandProfile) {
-      return NextResponse.json(
-        { error: 'Brand profile not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Brand profile not found' }, { status: 404 });
     }
 
-    // Generate campaigns for each platform and type combination
-    // Add delays between requests to avoid hitting rate limits
+    // Initialize context builder
+    const contextBuilder = new CampaignContextBuilder();
+    await contextBuilder.initialize();
+
+    // Get campaign count (fast - uses index)
+    const campaignCount = await contextBuilder.getCampaignCount(brandProfileId);
+    const campaignNumber = campaignCount + 1;
+
+    console.log(`[${brandProfileId}] Campaign #${campaignNumber}`);
+
+    // Generate campaigns for each platform
     const DELAY_BETWEEN_CAMPAIGNS = 2000; // 2 seconds between campaigns
     const DELAY_BETWEEN_PLATFORMS = 3000; // 3 seconds between platforms
 
     for (const platform of requestedPlatforms) {
-      console.log(`Generating ${platform} campaigns...`);
-      
       const platformCampaigns = [];
-      
+
       for (const type of requestedTypes) {
-        console.log(`  - Campaign type: ${type}`);
-        
         try {
-          const posts = await generateCampaign(
-            brandProfile.brandDNA,
+          // Get compact context (fast - aggregation pipeline, limited results)
+          const compactContext = await contextBuilder.getCompactContext(
+            brandProfileId,
             platform,
             type
           );
 
-          platformCampaigns.push({
+          console.log(`[${brandProfileId}] ${platform}/${type} - Found ${compactContext.usedHooks.length} previous hooks to avoid`);
+
+          // Generate with compact context
+          const posts = await generateCampaign(
+            brandProfile.brandDNA,
+            platform,
             type,
-            posts
-          });
-          
+            {
+              ...compactContext,
+              campaignNumber,
+              currentDate: new Date()
+            }
+          );
+
+          platformCampaigns.push({ type, posts });
+
           // Add delay between campaign types to avoid rate limits
           if (requestedTypes.indexOf(type) < requestedTypes.length - 1) {
             console.log(`  Waiting ${DELAY_BETWEEN_CAMPAIGNS}ms before next campaign...`);
             await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_CAMPAIGNS));
           }
         } catch (error) {
-          console.error(`Failed to generate ${type} campaign for ${platform}:`, error);
-          // Continue with other campaigns even if one fails
+          console.error(`[${brandProfileId}] Failed ${platform}/${type}:`, error);
         }
       }
 
-      // Save campaign for this platform
+      // Save campaign with fingerprint
       if (platformCampaigns.length > 0) {
+        const now = new Date();
         const campaign: Omit<Campaign, '_id'> = {
           brandProfileId: new ObjectId(brandProfileId),
-          createdAt: new Date(),
+          createdAt: now,
           platform,
-          campaigns: platformCampaigns
+          campaigns: platformCampaigns,
+          campaignNumber,
+          seasonGenerated: getSeason(now),
+          monthGenerated: now.getMonth() + 1,
+          yearGenerated: now.getFullYear()
         };
+
+        // Create fingerprint for future reference
+        campaign.fingerprint = contextBuilder.createFingerprint(campaign as Campaign);
 
         await db.collection<Campaign>('campaigns').insertOne(campaign as any);
       }
-      
+
       // Add delay between platforms to avoid rate limits
       if (requestedPlatforms.indexOf(platform) < requestedPlatforms.length - 1) {
         console.log(`Waiting ${DELAY_BETWEEN_PLATFORMS}ms before next platform...`);
@@ -111,23 +133,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch all campaigns for this brand profile
+    // Fetch updated campaigns (limit to recent for performance)
     const campaigns = await db.collection<Campaign>('campaigns')
       .find({ brandProfileId: new ObjectId(brandProfileId) })
       .sort({ createdAt: -1 })
+      .limit(50) // Only return recent campaigns to UI
       .toArray();
-
-    console.log(`Generated campaigns across ${requestedPlatforms.length} platforms`);
 
     return NextResponse.json({
       success: true,
       campaigns,
-      message: `Successfully generated campaigns for ${requestedPlatforms.join(', ')}`
+      campaignNumber,
+      message: `Campaign #${campaignNumber} generated successfully`
     });
 
   } catch (error) {
     console.error('Campaign generation error:', error);
-    
     return NextResponse.json(
       { 
         error: 'Failed to generate campaigns',
@@ -138,31 +159,27 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Keep existing GET route
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const brandProfileId = searchParams.get('brandProfileId');
 
     if (!brandProfileId) {
-      return NextResponse.json(
-        { error: 'Brand profile ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Brand profile ID required' }, { status: 400 });
     }
 
     const db = await getDb();
     const campaigns = await db.collection<Campaign>('campaigns')
       .find({ brandProfileId: new ObjectId(brandProfileId) })
       .sort({ createdAt: -1 })
+      .limit(50)
       .toArray();
 
     return NextResponse.json({ campaigns });
 
   } catch (error) {
-    console.error('Fetch campaigns error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch campaigns' },
-      { status: 500 }
-    );
+    console.error('Fetch error:', error);
+    return NextResponse.json({ error: 'Failed to fetch campaigns' }, { status: 500 });
   }
 }

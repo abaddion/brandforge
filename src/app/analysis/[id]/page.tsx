@@ -33,7 +33,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
+      <div className="mb-8 fade-in">
         <Link href="/" className="back-link">
           ← Back to Home
         </Link>
@@ -51,7 +51,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-2 gap-6 mb-8 fade-in" style={{ animationDelay: '0.1s' }}>
         {/* Content Analysis */}
         <div className="card">
           <h2 className="text-gold mb-4">📝 Content</h2>
@@ -126,7 +126,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Technical Details */}
-      <div className="card mb-8">
+      <div className="card mb-8 fade-in" style={{ animationDelay: '0.2s' }}>
         <h2 className="text-gold mb-4">⚙️ Technical</h2>
         <div className="grid grid-cols-4 gap-4">
           <div>
@@ -153,7 +153,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Next Step */}
-      <div className="card card-gradient">
+      <div className="card card-gradient fade-in" style={{ animationDelay: '0.3s' }}>
         <h2 className="mb-4">Ready for the next step?</h2>
         <p className="mb-6 text-secondary">
           Generate a comprehensive brand DNA profile using AI analysis of this website's content, design, and messaging.

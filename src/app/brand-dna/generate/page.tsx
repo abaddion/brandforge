@@ -52,7 +52,7 @@ function GenerateBrandDNAContent() {
 
   return (
     <div className="max-w-2xl mx-auto text-center">
-      <div className="card">
+      <div className="card fade-in">
         {status === 'loading' && (
           <>
             <div className="flex justify-center mb-6">
@@ -63,31 +63,31 @@ function GenerateBrandDNAContent() {
               Our AI is analyzing the website data to create a comprehensive brand profile...
             </p>
             <div className="text-left max-w-md mx-auto text-sm text-tertiary">
-              <p className="mb-2">✓ Analyzing content and messaging</p>
-              <p className="mb-2">✓ Evaluating visual identity</p>
-              <p className="mb-2">✓ Identifying target audience</p>
-              <p className="mb-2">✓ Determining brand positioning</p>
-              <p style={{ animation: 'pulse 2s infinite' }}>🔄 Generating insights...</p>
+              <p className="mb-2 fade-in" style={{ animationDelay: '0.1s' }}>✓ Analyzing content and messaging</p>
+              <p className="mb-2 fade-in" style={{ animationDelay: '0.2s' }}>✓ Evaluating visual identity</p>
+              <p className="mb-2 fade-in" style={{ animationDelay: '0.3s' }}>✓ Identifying target audience</p>
+              <p className="mb-2 fade-in" style={{ animationDelay: '0.4s' }}>✓ Determining brand positioning</p>
+              <p className="fade-in" style={{ animationDelay: '0.5s', animation: 'pulse 2s infinite' }}>🔄 Generating insights...</p>
             </div>
           </>
         )}
 
         {status === 'success' && (
           <>
-            <div className="text-6xl mb-4">✅</div>
-            <h1 className="mb-4">Brand DNA Generated!</h1>
-            <p className="text-secondary">Redirecting to your brand profile...</p>
+            <div className="text-6xl mb-4 fade-in">✅</div>
+            <h1 className="mb-4 fade-in">Brand DNA Generated!</h1>
+            <p className="text-secondary fade-in">Redirecting to your brand profile...</p>
           </>
         )}
 
         {status === 'error' && (
           <>
-            <div className="text-6xl mb-4">❌</div>
-            <h1 className="mb-4">Generation Failed</h1>
-            <p className="text-error mb-6">{error}</p>
+            <div className="text-6xl mb-4 fade-in">❌</div>
+            <h1 className="mb-4 fade-in">Generation Failed</h1>
+            <p className="text-error mb-6 fade-in">{error}</p>
             <button 
               onClick={() => router.back()}
-              className="btn btn-primary"
+              className="btn btn-primary fade-in"
             >
               Go Back
             </button>

@@ -36,7 +36,7 @@ export default async function BrandDNAPage({ params }: { params: Promise<{ id: s
   return (
     <div className="max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 fade-in">
         <Link href="/" className="back-link">
           ← Back to Home
         </Link>
@@ -61,7 +61,7 @@ export default async function BrandDNAPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Voice & Personality */}
-      <div className="card mb-6">
+      <div className="card mb-6 fade-in" style={{ animationDelay: '0.1s' }}>
         <h2 className="mb-4">
           <span className="text-gold">🎤</span> Voice & Personality
         </h2>
@@ -86,7 +86,7 @@ export default async function BrandDNAPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Values & Positioning */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-2 gap-6 mb-6 fade-in" style={{ animationDelay: '0.2s' }}>
         <div className="card">
           <h2 className="mb-4">
             <span className="text-gold">💎</span> Core Values
@@ -118,7 +118,7 @@ export default async function BrandDNAPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Target Audience */}
-      <div className="card mb-6">
+      <div className="card mb-6 fade-in" style={{ animationDelay: '0.3s' }}>
         <h2 className="mb-4">
           <span className="text-gold">👥</span> Target Audience
         </h2>
@@ -143,7 +143,7 @@ export default async function BrandDNAPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Visual Identity */}
-      <div className="card mb-8">
+      <div className="card mb-8 fade-in" style={{ animationDelay: '0.4s' }}>
         <h2 className="mb-4">
           <span className="text-gold">🎨</span> Visual Identity
         </h2>
@@ -168,7 +168,7 @@ export default async function BrandDNAPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Next Step - Generate Campaigns */}
-      <div className="card card-gradient">
+      <div className="card card-gradient fade-in" style={{ animationDelay: '0.5s' }}>
         <h2 className="mb-4">Ready to create campaigns?</h2>
         <p className="mb-6 text-secondary">
           Use this brand DNA profile to generate platform-specific social media campaigns that perfectly align with your brand identity.

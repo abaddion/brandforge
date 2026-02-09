@@ -36,18 +36,22 @@ export default function Home() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-12">
-        <h1>Forge Your Brand Identity</h1>
-        <p className="text-xl text-secondary">
+    <div className="max-w-6xl mx-auto">
+      {/* Hero Section */}
+      <div className="text-center mb-12 fade-in">
+        <h1 className="hero-title">
+          Forge Your Brand Identity
+        </h1>
+        <p className="hero-subtitle">
           Analyze any website and generate comprehensive brand DNA profiles with AI-powered social campaigns
         </p>
       </div>
 
-      <div className="card">
+      {/* Main Input Card */}
+      <div className="card max-w-2xl mx-auto mb-12">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="url">Website URL</label>
+            <label htmlFor="url">Enter Website URL</label>
             <input
               type="url"
               id="url"
@@ -72,37 +76,40 @@ export default function Home() {
             disabled={loading}
           >
             {loading ? (
-              <span className="flex items-center justify-center gap-2">
+              <span className="flex items-center justify-center gap-3">
                 <div className="spinner spinner-sm"></div>
                 Analyzing Website...
               </span>
             ) : (
-              'Analyze Website'
+              'Analyze Website →'
             )}
           </button>
         </form>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 mt-12">
-        <div className="card">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3>Deep Analysis</h3>
-          <p className="text-secondary">
-            Scrape and analyze website content, design, and messaging
+      {/* Feature Cards */}
+      <div className="grid grid-cols-3 gap-6">
+        <div className="feature-card fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="feature-icon">🔍</div>
+          <h3 className="mb-3">Deep Analysis</h3>
+          <p className="text-secondary text-sm">
+            Advanced web scraping to extract content, design patterns, and brand messaging
           </p>
         </div>
-        <div className="card">
-          <div className="text-6xl mb-4">🧬</div>
-          <h3>Brand DNA</h3>
-          <p className="text-secondary">
-            AI-powered brand identity extraction and profiling
+        
+        <div className="feature-card fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="feature-icon">🧬</div>
+          <h3 className="mb-3">Brand DNA</h3>
+          <p className="text-secondary text-sm">
+            AI-powered identity extraction revealing voice, values, and positioning
           </p>
         </div>
-        <div className="card">
-          <div className="text-6xl mb-4">🚀</div>
-          <h3>Campaigns</h3>
-          <p className="text-secondary">
-            Generate platform-specific social media campaigns
+        
+        <div className="feature-card fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="feature-icon">🚀</div>
+          <h3 className="mb-3">Smart Campaigns</h3>
+          <p className="text-secondary text-sm">
+            Platform-optimized social content that matches your unique brand identity
           </p>
         </div>
       </div>

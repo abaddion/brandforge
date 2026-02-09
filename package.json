@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "create-indexes": "tsx scripts/create-indexes.ts"
+    "create-indexes": "tsx scripts/create-indexes.ts",
+    "create-indexes-optimized": "tsx scripts/create-indexes-optimized.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",

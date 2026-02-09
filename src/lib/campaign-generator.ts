@@ -2,6 +2,16 @@ import { generateJSON } from './gemini';
 import { generateJSONWithClaude } from './anthropic';
 import { BrandDNA, Platform, CampaignTypeEnum, CampaignPost } from '@/types';
 
+interface CompactCampaignContext {
+  recentThemes: string[];
+  usedHooks: string[];
+  usedHashtags: string[];
+  campaignNumber: number;
+  currentDate: Date;
+  seasonalContext?: string;
+  seasonalDistribution?: Record<string, number>;
+}
+
 interface PlatformSpecs {
   maxLength: number;
   hashtagLimit: number;
@@ -70,9 +80,10 @@ const CAMPAIGN_TYPE_DESCRIPTIONS: Record<CampaignTypeEnum, string> = {
 export async function generateCampaign(
   brandDNA: BrandDNA,
   platform: Platform,
-  campaignType: CampaignTypeEnum
+  campaignType: CampaignTypeEnum,
+  context: CompactCampaignContext
 ): Promise<CampaignPost[]> {
-  const prompt = buildCampaignPrompt(brandDNA, platform, campaignType);
+  const prompt = buildCampaignPromptCompact(brandDNA, platform, campaignType, context);
   
   // Check if Anthropic fallback is disabled
   const useAnthropicFallback = process.env.USE_ANTHROPIC_FALLBACK !== 'false' && process.env.ANTHROPIC_API_KEY;
@@ -128,15 +139,51 @@ export async function generateCampaign(
   }
 }
 
-function buildCampaignPrompt(
+function buildCampaignPromptCompact(
   brandDNA: BrandDNA,
   platform: Platform,
-  campaignType: CampaignTypeEnum
+  campaignType: CampaignTypeEnum,
+  context: CompactCampaignContext
 ): string {
   const specs = PLATFORM_SPECS[platform];
   const typeDescription = CAMPAIGN_TYPE_DESCRIPTIONS[campaignType];
+  
+  // Get current date and season
+  const now = context.currentDate || new Date();
+  const month = now.toLocaleString('default', { month: 'long' });
+  const year = now.getFullYear();
+  const season = getSeason(now);
+  const seasonalContext = context.seasonalContext || getSeasonalContext(season);
+  
+  // Build compact avoidance list (much smaller token footprint)
+  let avoidanceContext = '';
+  if (context.usedHooks.length > 0 || context.recentThemes.length > 0) {
+    avoidanceContext = `
+FRESHNESS CONSTRAINTS (CRITICAL):
+==================================
+This is Campaign #${context.campaignNumber} for this brand.
 
-  return `You are an expert social media strategist. Create a ${platform.toUpperCase()} campaign based on the following brand DNA.
+AVOID these previously used opening hooks:
+${context.usedHooks.slice(0, 10).map((hook, i) => `${i + 1}. "${hook}..."`).join('\n')}
+
+AVOID these overused themes (find NEW angles):
+${context.recentThemes.slice(0, 15).join(', ')}
+
+AVOID these hashtags (already heavily used):
+${context.usedHashtags.slice(0, 20).map(h => `#${h}`).join(', ')}
+
+${context.seasonalDistribution ? `
+Previous seasonal focus:
+${Object.entries(context.seasonalDistribution)
+  .map(([season, count]) => `- ${season}: ${count} campaigns`)
+  .join('\n')}
+` : ''}
+
+IMPORTANT: Generate COMPLETELY FRESH content. Different angles, different examples, different hooks.
+`;
+  }
+
+  return `You are an expert social media strategist creating Campaign #${context.campaignNumber}.
 
 BRAND DNA PROFILE:
 ==================
@@ -151,75 +198,60 @@ ${brandDNA.values.map(v => `- ${v}`).join('\n')}
 
 TARGET AUDIENCE:
 - Demographics: ${brandDNA.target_audience.demographics}
-- Psychographics: ${brandDNA.target_audience.psychographics}
-- Pain Points: ${brandDNA.target_audience.pain_points.join(', ')}
+- Pain Points: ${brandDNA.target_audience.pain_points.slice(0, 3).join(', ')}
 
 POSITIONING:
-- Category: ${brandDNA.positioning.category}
 - Unique Value: ${brandDNA.positioning.unique_value}
-- Differentiation: ${brandDNA.positioning.competitors_differentiation}
 
-VISUAL IDENTITY:
-- Design Style: ${brandDNA.visual_identity.design_style}
-- Color Psychology: ${brandDNA.visual_identity.color_psychology}
-- Imagery Themes: ${brandDNA.visual_identity.imagery_themes.join(', ')}
+${avoidanceContext}
+
+CURRENT CONTEXT:
+================
+- Date: ${month} ${year}
+- Season: ${season}
+- Seasonal Themes: ${seasonalContext}
+- Campaign Number: #${context.campaignNumber}
 
 PLATFORM: ${platform.toUpperCase()}
-==================================
-
-Platform Specifications:
-- Maximum Character Length: ${specs.maxLength}
+- Max Length: ${specs.maxLength} chars
 - Hashtag Limit: ${specs.hashtagLimit}
 - Tone: ${specs.tone}
-
-Best Practices:
-${specs.bestPractices.map(bp => `- ${bp}`).join('\n')}
 
 CAMPAIGN TYPE: ${campaignType}
 ${typeDescription}
 
 INSTRUCTIONS:
-=============
+Create 3 COMPLETELY FRESH posts. Must be different from previous ${context.campaignNumber - 1} campaigns.
 
-Create 3 DISTINCT, HIGH-QUALITY social media posts for this campaign. Each post should:
+Requirements:
+1. NEW angles and hooks (not in the avoid list above)
+2. FRESH examples and references
+3. Incorporate ${season} ${year} context
+4. Match brand voice perfectly
+5. Include strategic hashtags (max ${specs.hashtagLimit}, avoid overused ones)
+6. Clear CTAs
+7. Image prompts for visuals
 
-1. PERFECTLY match the brand's voice, tone, and personality
-2. Speak directly to the target audience's pain points and aspirations
-3. Align with the brand's core values and positioning
-4. Follow ${platform} best practices and stay within character limits
-5. Be SPECIFIC and ACTIONABLE (avoid generic corporate speak)
-6. Include strategic hashtags (max ${specs.hashtagLimit})
-7. Have a clear call-to-action
-8. Include an image prompt describing the ideal visual to accompany the post
-
-IMPORTANT GUIDELINES:
-- Posts should feel authentic to this specific brand, not generic templates
-- Use the brand's language style consistently
-- Reference the brand's unique value proposition naturally
-- Each post should have a different angle or hook
-- For ${platform}, respect the ${specs.tone} nature of the platform
-- Stay WELL under ${specs.maxLength} characters (aim for optimal length for ${platform})
-
-Return ONLY valid JSON in this exact structure (no markdown, no explanations):
+Return ONLY valid JSON:
 
 {
   "posts": [
     {
-      "text": "The actual post copy that would be published",
-      "hashtags": ["relevant", "hashtags", "here"],
-      "imagePrompt": "Detailed description of the ideal image/visual to accompany this post",
-      "callToAction": "Specific action you want audience to take",
-      "bestTimeToPost": "Recommended day/time for maximum engagement (e.g., 'Tuesday 9-11 AM')"
+      "text": "Post copy here",
+      "hashtags": ["new", "fresh", "hashtags"],
+      "imagePrompt": "Image description",
+      "callToAction": "CTA text",
+      "bestTimeToPost": "Timing recommendation"
     },
     {
-      "text": "Second post with different angle...",
+      "text": "Second post with completely different angle...",
       "hashtags": ["different", "hashtags"],
       "imagePrompt": "Different image concept...",
       "callToAction": "Different CTA...",
       "bestTimeToPost": "Different timing..."
     },
     {
-      "text": "Third post with unique approach...",
+      "text": "Third post with unique fresh approach...",
       "hashtags": ["unique", "hashtags"],
       "imagePrompt": "Unique visual concept...",
       "callToAction": "Specific CTA...",
@@ -227,6 +259,25 @@ Return ONLY valid JSON in this exact structure (no markdown, no explanations):
     }
   ]
 }`;
+}
+
+// Helper functions for seasonal context
+function getSeason(date: Date): string {
+  const month = date.getMonth();
+  if (month >= 2 && month <= 4) return 'Spring';
+  if (month >= 5 && month <= 7) return 'Summer';
+  if (month >= 8 && month <= 10) return 'Fall';
+  return 'Winter';
+}
+
+function getSeasonalContext(season: string): string {
+  const contexts: Record<string, string> = {
+    'Spring': 'New beginnings, growth, renewal, fresh starts',
+    'Summer': 'Peak activity, vacations, high energy',
+    'Fall': 'Back to business, preparation, new academic year',
+    'Winter': 'Holidays, year-end planning, new year goals'
+  };
+  return contexts[season] || '';
 }
 
 export async function regenerateSinglePost(

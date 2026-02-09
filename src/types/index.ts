@@ -72,12 +72,79 @@ export interface CampaignType {
   posts: CampaignPost[];
 }
 
+// Compact representation of a campaign for context
+export interface CampaignFingerprint {
+  _id?: ObjectId;
+  brandProfileId: ObjectId;
+  platform: string;
+  campaignType: string;
+  createdAt: Date;
+  // Compact summary data
+  keyThemes: string[]; // Top 5-10 themes/topics
+  hooks: string[]; // Opening lines (first 50 chars)
+  hashtags: string[]; // All hashtags used
+  callToActions: string[]; // CTAs used
+  // Metadata
+  seasonGenerated: string;
+  monthGenerated: number;
+  yearGenerated: number;
+  campaignNumber: number;
+}
+
 export interface Campaign {
   _id?: ObjectId;
   brandProfileId: ObjectId;
   createdAt: Date;
   platform: string;
   campaigns: CampaignType[];
+  // Campaign metadata
+  campaignNumber?: number;
+  seasonGenerated?: string;
+  monthGenerated?: number;
+  yearGenerated?: number;
+  // NEW: Auto-generated fingerprint for future reference
+  fingerprint?: {
+    keyThemes: string[];
+    hooks: string[];
+    hashtags: string[];
+  };
+}
+
+export interface CampaignMetrics {
+  _id?: ObjectId;
+  campaignId: ObjectId;
+  brandProfileId: ObjectId;
+  platform: string;
+  postId?: string; // Social media post ID
+  // Metrics
+  impressions: number;
+  engagements: number;
+  clicks: number;
+  shares: number;
+  comments: number;
+  likes: number;
+  // Calculated
+  engagementRate: number;
+  ctr: number; // Click-through rate
+  // Timestamp
+  recordedAt: Date;
+  // Post details for reference
+  postText?: string;
+  hashtags?: string[];
+}
+
+export interface ScheduledPost {
+  _id?: ObjectId;
+  brandProfileId: ObjectId;
+  campaignId: ObjectId;
+  platform: string;
+  content: string;
+  hashtags: string[];
+  imagePrompt?: string;
+  scheduledFor: Date;
+  posted: boolean;
+  postId?: string;
+  createdAt: Date;
 }
 
 export type Platform = 'linkedin' | 'twitter' | 'instagram' | 'facebook';
