@@ -89,6 +89,43 @@ async function createOptimizedIndexes() {
     );
     console.log('  ✅ idx_url_analyzed');
 
+    // ============================================
+    // Published Posts Collection Indexes
+    // ============================================
+    console.log('\n📊 Creating indexes for published_posts collection...');
+
+    // Primary query: Get published posts by brand/platform for context
+    await db.collection('published_posts').createIndex(
+      { brandProfileId: 1, platform: 1, publishedAt: -1 },
+      { name: 'idx_published_brand_platform_date' }
+    );
+    console.log('  ✅ idx_published_brand_platform_date');
+
+    // Social account lookup
+    await db.collection('published_posts').createIndex(
+      { socialAccountId: 1 },
+      { name: 'idx_published_social_account' }
+    );
+    console.log('  ✅ idx_published_social_account');
+
+    // Unique constraint: prevent duplicate posts
+    await db.collection('published_posts').createIndex(
+      { platformPostId: 1, socialAccountId: 1 },
+      { unique: true, name: 'idx_published_unique' }
+    );
+    console.log('  ✅ idx_published_unique');
+
+    // ============================================
+    // Social Accounts Collection Indexes
+    // ============================================
+    console.log('\n📊 Creating indexes for social_accounts collection...');
+
+    await db.collection('social_accounts').createIndex(
+      { brandProfileId: 1, platform: 1 },
+      { name: 'idx_social_brand_platform' }
+    );
+    console.log('  ✅ idx_social_brand_platform');
+
     console.log('\n✨ All indexes created successfully!');
     console.log('\n📈 Performance improvements:');
     console.log('  - Campaign context queries: <100ms (was 3-5s)');

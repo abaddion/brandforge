@@ -149,3 +149,42 @@ export interface ScheduledPost {
 
 export type Platform = 'linkedin' | 'twitter' | 'instagram' | 'facebook';
 export type CampaignTypeEnum = 'product_launch' | 'thought_leadership' | 'engagement' | 'brand_awareness';
+
+export interface SocialAccount {
+  _id?: ObjectId;
+  brandProfileId: ObjectId;
+  platform: Platform;
+  profileId: string; // LinkedIn person URN, Twitter user ID, etc.
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt: Date;
+  connectedAt: Date;
+  // Profile info
+  displayName?: string;
+  profileUrl?: string;
+  avatarUrl?: string;
+}
+
+export interface PublishedPost {
+  _id?: ObjectId;
+  socialAccountId: ObjectId;
+  brandProfileId: ObjectId;
+  platform: Platform;
+  platformPostId: string;
+  content: string;
+  publishedAt: Date;
+  // Analytics
+  engagement?: {
+    likes: number;
+    comments: number;
+    shares: number;
+  };
+  // Fingerprint for quick comparison
+  fingerprint: {
+    hook: string; // First 60 chars
+    keyThemes: string[];
+    hashtags: string[];
+  };
+  // Sync metadata
+  lastSyncedAt: Date;
+}

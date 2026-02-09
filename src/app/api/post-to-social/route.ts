@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { postToLinkedIn, postToTwitter, postToFacebook } from '@/lib/social-posting';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-import { CampaignMetrics } from '@/types';
+import { CampaignMetrics, PublishedPost, SocialAccount } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,9 +65,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const db = await getDb();
+    
     // Store metrics entry (initialized with 0, will be updated via webhook or polling)
     if (campaignId && brandProfileId) {
-      const db = await getDb();
       await db.collection<CampaignMetrics>('campaign_metrics').insertOne({
         campaignId: new ObjectId(campaignId),
         brandProfileId: new ObjectId(brandProfileId),
@@ -85,6 +86,51 @@ export async function POST(request: NextRequest) {
         postText: content,
         hashtags: hashtags || [],
       });
+    }
+
+    // ✅ Auto-save to published_posts when posting from BrandForge
+    if (brandProfileId && result.postId) {
+      try {
+        // Find social account by platform and brandProfileId
+        const socialAccount = await db.collection<SocialAccount>('social_accounts').findOne({
+          brandProfileId: new ObjectId(brandProfileId),
+          platform: platform.toLowerCase()
+        });
+
+        if (socialAccount) {
+          // Create fingerprint
+          const hook = content.substring(0, 60).trim();
+          const words = content.toLowerCase()
+            .split(/\s+/)
+            .filter(w => w.length > 5);
+          const keyThemes = [...new Set(words.slice(0, 5))];
+          
+          // Extract hashtags
+          const hashtagMatches = content.match(/#[\w]+/g) || [];
+          const hashtagsArray = hashtagMatches.map(h => h.substring(1).toLowerCase());
+
+          const publishedPost: Omit<PublishedPost, '_id'> = {
+            socialAccountId: socialAccount._id!,
+            brandProfileId: new ObjectId(brandProfileId),
+            platform: platform.toLowerCase() as any,
+            platformPostId: result.postId,
+            content,
+            publishedAt: new Date(),
+            fingerprint: {
+              hook,
+              keyThemes,
+              hashtags: hashtagsArray
+            },
+            lastSyncedAt: new Date()
+          };
+
+          await db.collection<PublishedPost>('published_posts').insertOne(publishedPost as any);
+          console.log(`[Post] Auto-saved published post ${result.postId} to database`);
+        }
+      } catch (error) {
+        // Don't fail the post if saving fails
+        console.error('[Post] Failed to auto-save published post:', error);
+      }
     }
 
     return NextResponse.json({

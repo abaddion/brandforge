@@ -73,22 +73,26 @@ export async function POST(request: NextRequest) {
 
       for (const type of requestedTypes) {
         try {
-          // Get compact context (fast - aggregation pipeline, limited results)
-          const compactContext = await contextBuilder.getCompactContext(
+          // ✅ Use FULL context including published posts
+          const fullContext = await contextBuilder.getFullContext(
             brandProfileId,
             platform,
             type
           );
 
-          console.log(`[${brandProfileId}] ${platform}/${type} - Found ${compactContext.usedHooks.length} previous hooks to avoid`);
+          console.log(
+            `[${brandProfileId}] ${platform}/${type} - ` +
+            `${fullContext.usedHooks.length} generated hooks, ` +
+            `${fullContext.publishedHooks?.length || 0} published hooks to avoid`
+          );
 
-          // Generate with compact context
+          // Generate with full context (includes both generated and published posts)
           const posts = await generateCampaign(
             brandProfile.brandDNA,
             platform,
             type,
             {
-              ...compactContext,
+              ...fullContext,
               campaignNumber,
               currentDate: new Date()
             }

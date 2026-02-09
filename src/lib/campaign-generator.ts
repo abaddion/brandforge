@@ -10,6 +10,10 @@ interface CompactCampaignContext {
   currentDate: Date;
   seasonalContext?: string;
   seasonalDistribution?: Record<string, number>;
+  // NEW: Published posts context
+  publishedHooks?: string[];
+  publishedThemes?: string[];
+  publishedHashtags?: string[];
 }
 
 interface PlatformSpecs {
@@ -157,29 +161,53 @@ function buildCampaignPromptCompact(
   
   // Build compact avoidance list (much smaller token footprint)
   let avoidanceContext = '';
+  
+  // Section 1: BrandForge generated campaigns
   if (context.usedHooks.length > 0 || context.recentThemes.length > 0) {
-    avoidanceContext = `
-FRESHNESS CONSTRAINTS (CRITICAL):
-==================================
-This is Campaign #${context.campaignNumber} for this brand.
+    avoidanceContext += `
+PREVIOUSLY GENERATED CAMPAIGNS (AVOID REPEATING):
+==================================================
+You have previously generated ${context.campaignNumber - 1} campaigns in BrandForge.
 
-AVOID these previously used opening hooks:
+AVOID these opening hooks from generated campaigns:
 ${context.usedHooks.slice(0, 10).map((hook, i) => `${i + 1}. "${hook}..."`).join('\n')}
 
-AVOID these overused themes (find NEW angles):
+AVOID these themes from generated campaigns:
 ${context.recentThemes.slice(0, 15).join(', ')}
 
-AVOID these hashtags (already heavily used):
+AVOID these hashtags from generated campaigns:
 ${context.usedHashtags.slice(0, 20).map(h => `#${h}`).join(', ')}
+`;
+  }
 
-${context.seasonalDistribution ? `
+  // Section 2: REAL published posts (CRITICAL - most important to avoid)
+  if (context.publishedHooks && context.publishedHooks.length > 0) {
+    avoidanceContext += `
+
+🔴 CRITICAL: ALREADY PUBLISHED ON ${platform.toUpperCase()} (NEVER REPEAT THESE):
+===================================================================================
+The user has ALREADY published these posts on their actual ${platform} account.
+You MUST generate completely different content that doesn't overlap with these.
+
+Published opening hooks to AVOID:
+${context.publishedHooks.slice(0, 15).map((hook, i) => `${i + 1}. "${hook}..."`).join('\n')}
+
+Published themes to AVOID:
+${context.publishedThemes?.slice(0, 20).join(', ') || 'None'}
+
+Published hashtags to AVOID:
+${context.publishedHashtags?.slice(0, 25).map(h => `#${h}`).join(', ') || 'None'}
+
+This is REAL content already on ${platform}. Your new campaigns must be COMPLETELY DIFFERENT.
+`;
+  }
+
+  if (context.seasonalDistribution) {
+    avoidanceContext += `
 Previous seasonal focus:
 ${Object.entries(context.seasonalDistribution)
   .map(([season, count]) => `- ${season}: ${count} campaigns`)
   .join('\n')}
-` : ''}
-
-IMPORTANT: Generate COMPLETELY FRESH content. Different angles, different examples, different hooks.
 `;
   }
 

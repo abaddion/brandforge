@@ -146,4 +146,83 @@ export class CampaignContextBuilder {
       hashtags: Array.from(hashtags)
     };
   }
+
+  /**
+   * Get context from REAL published posts on social media
+   * This ensures we don't repeat what's already live on their LinkedIn/Twitter
+   */
+  async getPublishedPostsContext(
+    brandProfileId: string,
+    platform: Platform
+  ): Promise<{
+    publishedHooks: string[];
+    publishedThemes: string[];
+    publishedHashtags: string[];
+    totalPublished: number;
+  }> {
+    await this.initialize();
+
+    // Get all published posts for this brand on this platform
+    const publishedPosts = await this.db.collection('published_posts')
+      .find({
+        brandProfileId: new ObjectId(brandProfileId),
+        platform: platform
+      })
+      .sort({ publishedAt: -1 })
+      .limit(50) // Last 50 published posts
+      .toArray();
+
+    const hooks = new Set<string>();
+    const themes = new Set<string>();
+    const hashtags = new Set<string>();
+
+    for (const post of publishedPosts) {
+      if (post.fingerprint) {
+        hooks.add(post.fingerprint.hook);
+        post.fingerprint.keyThemes?.forEach((t: string) => themes.add(t));
+        post.fingerprint.hashtags?.forEach((h: string) => hashtags.add(h));
+      }
+    }
+
+    return {
+      publishedHooks: Array.from(hooks),
+      publishedThemes: Array.from(themes),
+      publishedHashtags: Array.from(hashtags),
+      totalPublished: publishedPosts.length
+    };
+  }
+
+  /**
+   * Enhanced context that includes BOTH generated campaigns AND published posts
+   */
+  async getFullContext(
+    brandProfileId: string,
+    platform: Platform,
+    campaignType: CampaignTypeEnum
+  ): Promise<ContextSummary & {
+    publishedHooks?: string[];
+    publishedThemes?: string[];
+    publishedHashtags?: string[];
+  }> {
+    // Get context from BrandForge campaigns
+    const campaignContext = await this.getCompactContext(
+      brandProfileId,
+      platform,
+      campaignType
+    );
+
+    // Get context from REAL published posts
+    const publishedContext = await this.getPublishedPostsContext(
+      brandProfileId,
+      platform
+    );
+
+    // Merge both contexts
+    return {
+      ...campaignContext,
+      publishedHooks: publishedContext.publishedHooks,
+      publishedThemes: publishedContext.publishedThemes,
+      publishedHashtags: publishedContext.publishedHashtags
+    };
+  }
 }

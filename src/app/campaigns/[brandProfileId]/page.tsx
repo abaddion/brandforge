@@ -27,12 +27,61 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
 
   useEffect(() => {
     if (brandProfileId) {
       fetchCampaigns();
+      fetchConnectedAccounts();
     }
   }, [brandProfileId]);
+
+  const fetchConnectedAccounts = async () => {
+    try {
+      const response = await fetch(`/api/social/accounts?brandProfileId=${brandProfileId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setConnectedAccounts(data.accounts || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch connected accounts:', err);
+    }
+  };
+
+  const handleSyncPosts = async () => {
+    const linkedInAccount = connectedAccounts.find(a => a.platform === 'linkedin');
+    if (!linkedInAccount) {
+      alert('Please connect LinkedIn first');
+      return;
+    }
+
+    setSyncing(true);
+    try {
+      const response = await fetch('/api/social/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          socialAccountId: linkedInAccount._id
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+
+      setLastSync(new Date());
+      alert(`✓ Synced ${data.syncedCount} new posts! Total: ${data.totalPosts} posts in database.`);
+
+    } catch (err) {
+      alert(`Failed to sync: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const fetchCampaigns = async () => {
     try {
@@ -121,6 +170,29 @@ export default function CampaignsPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {connectedAccounts.find(a => a.platform === 'linkedin') && (
+              <button 
+                onClick={handleSyncPosts}
+                disabled={syncing}
+                className="btn btn-secondary"
+              >
+                {syncing ? (
+                  <span className="flex items-center gap-2">
+                    <div className="spinner spinner-sm"></div>
+                    Syncing Posts...
+                  </span>
+                ) : (
+                  <>
+                    🔄 Sync LinkedIn Posts
+                    {lastSync && (
+                      <span className="text-xs opacity-75 ml-2">
+                        (Last: {lastSync.toLocaleTimeString()})
+                      </span>
+                    )}
+                  </>
+                )}
+              </button>
+            )}
             <Link 
               href={`/analytics/${brandProfileId}`}
               className="btn btn-secondary"
