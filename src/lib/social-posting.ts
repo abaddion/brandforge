@@ -23,7 +23,7 @@ export async function postToLinkedIn(
     // Format content with hashtags
     let postText = content;
     if (hashtags && hashtags.length > 0) {
-      const hashtagString = hashtags.map(h => `#${h}`).join(' ');
+      const hashtagString = hashtags.map((h: string) => `#${h}`).join(' ');
       postText = `${content}\n\n${hashtagString}`;
     }
 
@@ -84,7 +84,7 @@ export async function postToTwitter(
     // Format content with hashtags
     let postText = content;
     if (hashtags && hashtags.length > 0) {
-      const hashtagString = hashtags.map(h => `#${h}`).join(' ');
+      const hashtagString = hashtags.map((h: string) => `#${h}`).join(' ');
       // Twitter has 280 char limit, so we need to be careful
       const availableSpace = 280 - postText.length - hashtagString.length - 2; // 2 for \n\n
       if (availableSpace >= 0) {
@@ -137,7 +137,7 @@ export async function postToFacebook(
   try {
     let postText = content;
     if (hashtags && hashtags.length > 0) {
-      const hashtagString = hashtags.map(h => `#${h}`).join(' ');
+      const hashtagString = hashtags.map((h: string) => `#${h}`).join(' ');
       postText = `${content}\n\n${hashtagString}`;
     }
 

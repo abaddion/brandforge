@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         
         // Extract hashtags
         const hashtagMatches = post.text.match(/#[\w]+/g) || [];
-        const hashtags = hashtagMatches.map(h => h.substring(1).toLowerCase());
+        const hashtags = hashtagMatches.map((h: string) => h.substring(1).toLowerCase());
 
         // Store post
         const publishedPost: Omit<PublishedPost, '_id'> = {

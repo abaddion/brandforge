@@ -136,7 +136,7 @@ export class CampaignContextBuilder {
         words.slice(0, 3).forEach((w: string) => themes.add(w));
 
         // Hashtags
-        post.hashtags.forEach(h => hashtags.add(h));
+        post.hashtags.forEach((h: string) => hashtags.add(h));
       }
     }
 

@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
           
           // Extract hashtags
           const hashtagMatches = content.match(/#[\w]+/g) || [];
-          const hashtagsArray = hashtagMatches.map(h => h.substring(1).toLowerCase());
+          const hashtagsArray = hashtagMatches.map((h: string) => h.substring(1).toLowerCase());
 
           const publishedPost: Omit<PublishedPost, '_id'> = {
             socialAccountId: socialAccount._id!,

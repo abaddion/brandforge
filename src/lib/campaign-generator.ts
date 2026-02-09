@@ -196,7 +196,7 @@ Published themes to AVOID:
 ${context.publishedThemes?.slice(0, 20).join(', ') || 'None'}
 
 Published hashtags to AVOID:
-${context.publishedHashtags?.slice(0, 25).map(h => `#${h}`).join(', ') || 'None'}
+${context.publishedHashtags?.slice(0, 25).map((h: string) => `#${h}`).join(', ') || 'None'}
 
 This is REAL content already on ${platform}. Your new campaigns must be COMPLETELY DIFFERENT.
 `;
