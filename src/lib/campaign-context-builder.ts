@@ -132,8 +132,8 @@ export class CampaignContextBuilder {
         // Themes (simple extraction)
         const words = post.text.toLowerCase()
           .split(/\s+/)
-          .filter(w => w.length > 5);
-        words.slice(0, 3).forEach(w => themes.add(w));
+          .filter((w: string) => w.length > 5);
+        words.slice(0, 3).forEach((w: string) => themes.add(w));
 
         // Hashtags
         post.hashtags.forEach(h => hashtags.add(h));

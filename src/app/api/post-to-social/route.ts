@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
           const hook = content.substring(0, 60).trim();
           const words = content.toLowerCase()
             .split(/\s+/)
-            .filter(w => w.length > 5);
+            .filter((w: string) => w.length > 5);
           const keyThemes = [...new Set(words.slice(0, 5))];
           
           // Extract hashtags
